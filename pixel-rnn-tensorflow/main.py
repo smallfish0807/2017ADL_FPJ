@@ -135,7 +135,7 @@ def main(_):
                         images = binarize(next_test_batch(conf.batch_size)) \
                             .reshape([conf.batch_size, height, width, channel])
                     elif conf.data == 'imageNet':
-                        images = binarize(get_batch(images_all_test, conf.batch_size, epoch))
+                        images = get_batch(images_all_test, conf.batch_size, epoch)
 
                     cost = network.test(images, with_update=False)
                     total_test_costs.append(cost)
