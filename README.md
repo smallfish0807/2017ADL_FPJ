@@ -1,4 +1,11 @@
 # 2017ADL_FPJ
+## Install packages
+python: 2.7.12  
+tensorflow: 1.4.1  
+pillow  
+
+## Run
+python2 main.py --data=imageNet --model=pixel_cnn --hidden_dims=64 --recurrent_length=2 --out_hidden_dims=64  
 
 ## Plan
 11/25 Survey paper + learn corresponding techniques  
