@@ -122,9 +122,7 @@ def main(_):
                         images = binarize(next_train_batch(conf.batch_size)) \
                             .reshape([conf.batch_size, height, width, channel])
                     elif conf.data == 'imageNet':
-                        images = binarize(get_batch(images_all_train, conf.batch_size, epoch))
-                        print('\ntype of images:', type(images))
-                        print('shape of images:', images.shape)
+                        images = get_batch(images_all_train, conf.batch_size, epoch)
 
 
                     cost = network.test(images, with_update=True)
