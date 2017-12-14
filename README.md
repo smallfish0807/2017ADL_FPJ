@@ -3,6 +3,7 @@
 python: 2.7.12  
 tensorflow: 1.4.1  
 pillow  
+tqdm
 
 ## Run
 python2 main.py --data=imageNet --model=pixel_cnn --hidden_dims=64 --recurrent_length=2 --out_hidden_dims=64  
