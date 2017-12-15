@@ -12,8 +12,7 @@ def prepro(o):
     y = 0.2126 * o[:, :, 0] + 0.7152 * o[:, :, 1] + 0.0722 * o[:, :, 2]
     y = y.astype(np.uint8)
     resized = scipy.misc.imresize(y, o.shape[:-1])
-    resized = resized / 255
-    return np.expand_dims(resized.astype(np.float32),axis=2)
+    return np.expand_dims(resized.astype(np.float32),axis=2) / 255
 
 def get_all_imageNet_images(file_path):
     filename_list = [f for f in listdir(file_path) if isfile(join(file_path, f))]
