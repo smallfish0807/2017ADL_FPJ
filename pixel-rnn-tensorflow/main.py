@@ -90,14 +90,14 @@ def main(_):
         height, width, channel = IMAGE_SIZE, IMAGE_SIZE, 3
     elif conf.data == 'imageNet':
         images_all_train = get_all_imageNet_images('../data_small/train_32x32/')
-        images_all_valid = get_all_imageNet_images('../data_small/valid_32x32/')
+        images_all_test = get_all_imageNet_images('../data_small/valid_32x32/')
         np.save('./npy/images_all_train_small', images_all_train)
-        np.save('./npy/images_all_valid_small', images_all_valid)
+        np.save('./npy/images_all_test_small', images_all_test)
         #images_all_train = np.load('./npy/images_all_train_small.npy')
-        #images_all_valid = np.load('./npy/images_all_valid_small.npy')
+        #images_all_test = np.load('./npy/images_all_test_small.npy')
         height, width, channel = 32, 32, 1
         train_step_per_epoch = images_all_train.shape[0] / conf.batch_size
-        test_step_per_epoch = images_all_valid.shape[0] / conf.batch_size
+        test_step_per_epoch = images_all_test.shape[0] / conf.batch_size
 
 
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.1)
@@ -117,12 +117,12 @@ def main(_):
                 # 1. train
                 total_train_costs = []
                 for idx in xrange(train_step_per_epoch):
-                    if conf.data == "mnist" or conf.data == "imagNet":
+                    if conf.data == "mnist":
                         #next_train_batch(conf.batch_size).shape: (100, 784)
                         images = binarize(next_train_batch(conf.batch_size)) \
                             .reshape([conf.batch_size, height, width, channel])
-                    #elif conf.data == 'imageNet':
-                    #    images = get_batch(images_all_train, conf.batch_size, epoch)
+                    elif conf.data == 'imageNet':
+                        images = binarize(get_batch(images_all_train, conf.batch_size, epoch))
 
 
                     cost = network.test(images, with_update=True)
@@ -131,11 +131,11 @@ def main(_):
                 # 2. test
                 total_test_costs = []
                 for idx in xrange(test_step_per_epoch):
-                    if conf.data == "mnist" or conf.data == "imageNet":
+                    if conf.data == "mnist":
                         images = binarize(next_test_batch(conf.batch_size)) \
                             .reshape([conf.batch_size, height, width, channel])
-                    #elif conf.data == 'imageNet':
-                    #    images = get_batch(images_all_test, conf.batch_size, epoch)
+                    elif conf.data == 'imageNet':
+                        images = binarize(get_batch(images_all_test, conf.batch_size, epoch))
 
                     cost = network.test(images, with_update=False)
                     total_test_costs.append(cost)
