@@ -30,7 +30,7 @@ class Network:
 
         self.l['inputs'] = tf.placeholder(tf.float32, [None, height, width, channel],)
 
-        if conf.data =='mnist':
+        if conf.data =='mnist' or conf.data == 'imageNet':
             self.l['normalized_inputs'] = self.l['inputs']
         else:
             self.l['normalized_inputs'] = tf.div(self.l['inputs'], 255., name="normalized_inputs")
@@ -141,7 +141,7 @@ class Network:
                     next_sample = binarize(self.predict(samples))
                     samples[:, i, j, k] = next_sample[:, i, j, k]
 
-                    if self.data == 'mnist':
+                    if self.data == 'mnist' or self.data == 'imageNet':
                         print("=" * (self.width/2), "(%2d, %2d)" % (i, j), "=" * (self.width/2))
                         mprint(next_sample[0,:,:,:])
 
