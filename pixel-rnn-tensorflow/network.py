@@ -13,6 +13,7 @@ class Network:
         self.sess = sess
         self.data = conf.data
         self.height, self.width, self.channel = height, width, channel
+        self.use_binarize = conf.use_binarize
 
         if conf.use_gpu:
             data_format = "NHWC"
@@ -139,7 +140,7 @@ class Network:
         for i in range(self.height):
             for j in range(self.width):
                 for k in range(self.channel):
-                    if conf.use_binarize:
+                    if self.use_binarize:
                         next_sample = binarize(self.predict(samples))
                     else:
                         next_sample = self.predict(samples)
@@ -159,7 +160,7 @@ class Network:
         for i in range(height_begin, self.height):
             for j in range(self.width):
                 for k in range(self.channel):
-                    if conf.use_binarize:
+                    if self.use_binarize:
                         next_sample = binarize(self.predict(samples))
                     else:
                         next_sample = self.predict(samples)
