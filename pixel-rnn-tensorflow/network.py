@@ -120,7 +120,7 @@ class Network:
         self.optim = optimizer.apply_gradients(new_grads_and_vars)
 
         # CE
-        self.ce = tf.reduce_mean(-tf.reduce_sum(self.l['inputs'] * tf.log(self.l['predict_half']), reduction_indices=[1,2,3]))
+        self.ce = tf.reduce_mean(-tf.reduce_mean(self.l['inputs'] * tf.log(self.l['predict_half']), reduction_indices=[1,2,3]))
 
         show_all_variables()
 
@@ -177,6 +177,6 @@ class Network:
         return samples
 
     def count_ce(self, y_true, y_pred):
-        y_pred[y_pred == 0] = 1e-10 #SMALL_NUM
+        y_pred[y_pred == 0] = 1e-20 #SMALL_NUM
         return self.sess.run(self.ce, {self.l['inputs']: y_true, self.l['predict_half']: y_pred})
 
