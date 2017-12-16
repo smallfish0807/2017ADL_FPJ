@@ -3,7 +3,6 @@ import logging
 logging.basicConfig(format="[%(asctime)s] %(message)s", datefmt="%m-%d %H:%M:%S")
 
 import numpy as np
-from tqdm import trange
 import tensorflow as tf
 
 from utils import *
