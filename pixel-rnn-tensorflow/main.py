@@ -150,7 +150,7 @@ def main(_):
                         if epoch % 10 == 0 and idx == 0:
                             test_out = network.predict(images)
                             save_images(test_out, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_out_epoch_%s" % epoch)
-                            test_out_half = network.test_generate_half(images)
+                            test_out_half = network.generate_half(images)
                             save_images(test_out_half, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_out_half_epoch_%s" % epoch)
 
                     #print('total_train_costs=', total_train_costs, ' total_test_costs=', total_test_costs)

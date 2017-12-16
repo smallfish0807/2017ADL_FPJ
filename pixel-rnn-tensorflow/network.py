@@ -153,7 +153,8 @@ class Network:
         samples = images
         height_begin = self.height // 2
         samples[:, height_begin:, :, :] = 0. # remove lower half of images
-        for i in range(height_begin, height):
+
+        for i in range(height_begin, self.height):
             for j in range(self.width):
                 for k in range(self.channel):
                     #next_sample = binarize(self.predict(samples))
