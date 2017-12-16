@@ -152,3 +152,19 @@ class Network:
         out = self.sess.run(self.l['output'], feed_dict={ self.l['inputs']: images })
         return out
 
+    def generate_half(self, images):
+        samples = images
+        height_begin = self.height // 2
+        samples[:, height_begin:, :, :] = 0. # remove lower half of images
+        for i in range(height_begin, height):
+            for j in range(self.width):
+                for k in range(self.channel):
+                    #next_sample = binarize(self.predict(samples))
+                    next_sample = self.predict(samples)
+                    samples[:, i, j, k] = next_sample[:, i, j, k]
+
+                    if self.data == 'mnist':
+                        print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
+                        mprint(next_sample[0,:,:,:])
+
+        return samples

@@ -147,6 +147,8 @@ def main(_):
                             save_images(images, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_ori_epoch_%s" % epoch)
                             test_out = network.test_generate(images)
                             save_images(test_out, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_out_epoch_%s" % epoch)
+                            test_out_half = network.test_generate_half(images)
+                            save_images(test_out_half, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_out_half_epoch_%s" % epoch)
 
                     #print('total_train_costs=', total_train_costs, ' total_test_costs=', total_test_costs)
                     avg_train_cost, avg_test_cost = np.mean(total_train_costs), np.mean(total_test_costs)
