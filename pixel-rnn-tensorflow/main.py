@@ -159,7 +159,7 @@ def main(_):
                             test_out_half = network.generate_half(images)
                             save_images(test_out_half, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_out_half_epoch_%s" % epoch)
 
-                        # count CE(images, test_out_half)
+                        # Count half CE (lower half of images, lower half of test_out_half) 
                         test_out_half = network.generate_half(images)
                         ce = network.count_ce(images, test_out_half)
                         total_ce.append(ce)
@@ -183,5 +183,4 @@ def main(_):
             save_images(samples, height, width, 10, 10, directory=SAMPLE_DIR)
 
 
-if __name__ == "__main__":
-    tf.app.run()
+if __name__ == 

@@ -13,6 +13,7 @@ class Network:
         self.sess = sess
         self.data = conf.data
         self.height, self.width, self.channel = height, width, channel
+        self.height_begin = self.height // 2
         self.use_binarize = conf.use_binarize
 
         if conf.use_gpu:
@@ -30,7 +31,8 @@ class Network:
         self.l = {}
 
         self.l['inputs'] = tf.placeholder(tf.float32, [None, height, width, channel],)
-        self.l['predict_half'] = tf.placeholder(tf.float32, [None, height, width, channel],)
+        self.l['inputs_ce'] = tf.placeholder(tf.float32, [None, height-self.height_begin, width, channel],)
+        self.l['predict_half'] = tf.placeholder(tf.float32, [None, height-self.height_begin, width, channel],)
 
         if conf.data =='mnist' or conf.data == 'imageNet':
             self.l['normalized_inputs'] = self.l['inputs']
@@ -120,7 +122,7 @@ class Network:
         self.optim = optimizer.apply_gradients(new_grads_and_vars)
 
         # CE
-        self.ce = tf.reduce_mean(-tf.reduce_mean(self.l['inputs'] * tf.log(self.l['predict_half']), reduction_indices=[1,2,3]))
+        self.ce = tf.reduce_mean(-tf.reduce_mean(self.l['inputs_ce'] * tf.log(self.l['predict_half']), reduction_indices=[1,2,3]))
 
         show_all_variables()
 
@@ -158,10 +160,9 @@ class Network:
 
     def generate_half(self, images):
         samples = images.copy()
-        height_begin = self.height // 2
-        samples[:, height_begin:, :, :] = 0. # remove lower half of images
+        samples[:, self.height_begin:, :, :] = 0. # remove lower half of images
 
-        for i in range(height_begin, self.height):
+        for i in range(self.height_begin, self.height):
             for j in range(self.width):
                 for k in range(self.channel):
                     if self.use_binarize:
@@ -178,5 +179,5 @@ class Network:
 
     def count_ce(self, y_true, y_pred):
         y_pred[y_pred == 0] = 1e-20 #SMALL_NUM
-        return self.sess.run(self.ce, {self.l['inputs']: y_true, self.l['predict_half']: y_pred})
+        return self.sess.run(self.ce, {self.l['inputs_ce']: y_true[:, self.height_begin:, :, :], self.l['predict_half']: y_pred[:, self.height_begin:, :, :]})
 
