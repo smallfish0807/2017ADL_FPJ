@@ -109,7 +109,8 @@ class Network:
             self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.l['conv2d_out_logits'], labels=self.l['normalized_inputs'], name='loss'))
 
-        optimizer = tf.train.RMSPropOptimizer(conf.learning_rate)
+        #optimizer = tf.train.RMSPropOptimizer(conf.learning_rate)
+        optimizer = tf.train.AdamOptimizer(conf.learning_rate)
         grads_and_vars = optimizer.compute_gradients(self.loss)
 
         new_grads_and_vars = \
@@ -147,8 +148,3 @@ class Network:
                         mprint(next_sample[0,:,:,:])
 
         return samples
-
-    def test_generate(self, images):
-        out = self.sess.run(self.l['output'], feed_dict={ self.l['inputs']: images })
-        return out
-
