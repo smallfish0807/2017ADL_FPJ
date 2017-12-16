@@ -139,8 +139,10 @@ class Network:
         for i in range(self.height):
             for j in range(self.width):
                 for k in range(self.channel):
-                    #next_sample = binarize(self.predict(samples))
-                    next_sample = self.predict(samples)
+                    if conf.use_binarize:
+                        next_sample = binarize(self.predict(samples))
+                    else:
+                        next_sample = self.predict(samples)
                     samples[:, i, j, k] = next_sample[:, i, j, k]
 
                     if self.data == 'mnist':
@@ -157,8 +159,10 @@ class Network:
         for i in range(height_begin, self.height):
             for j in range(self.width):
                 for k in range(self.channel):
-                    #next_sample = binarize(self.predict(samples))
-                    next_sample = self.predict(samples)
+                    if conf.use_binarize:
+                        next_sample = binarize(self.predict(samples))
+                    else:
+                        next_sample = self.predict(samples)
                     samples[:, i, j, k] = next_sample[:, i, j, k]
 
                     if self.data == 'mnist':

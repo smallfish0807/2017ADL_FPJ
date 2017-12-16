@@ -30,6 +30,7 @@ flags.DEFINE_integer("save_step", 1, "# of step to save a model")
 flags.DEFINE_float("learning_rate", 1e-3, "learning rate")
 flags.DEFINE_float("grad_clip", 1, "value of gradient to be used for clipping")
 flags.DEFINE_boolean("use_gpu", True, "whether to use gpu for training")
+flags.DEFINE_boolean("use_binarize", False, "whether to binarize data")
 
 # data
 flags.DEFINE_string("data", "mnist", "name of dataset [mnist, cifar, imageNet]")
@@ -122,8 +123,10 @@ def main(_):
                         images = binarize(next_train_batch(conf.batch_size)) \
                             .reshape([conf.batch_size, height, width, channel])
                     elif conf.data == 'imageNet':
-                        #images = binarize(get_batch(images_all_train, conf.batch_size, idx))
-                        images = get_batch(images_all_train, conf.batch_size, idx)
+                        if conf.use_binarize:
+                            images = binarize(get_batch(images_all_train, conf.batch_size, idx))
+                        else:
+                            images = get_batch(images_all_train, conf.batch_size, idx)
 
 
                     cost = network.test(images, with_update=True)
@@ -138,8 +141,10 @@ def main(_):
                             images = binarize(next_test_batch(conf.batch_size)) \
                                 .reshape([conf.batch_size, height, width, channel])
                         elif conf.data == 'imageNet':
-                            #images = binarize(get_batch(images_all_test, conf.batch_size, idx))
-                            images = get_batch(images_all_test, conf.batch_size, idx)
+                            if conf.use_binarize:
+                                images = binarize(get_batch(images_all_test, conf.batch_size, idx))
+                            else:
+                                images = get_batch(images_all_test, conf.batch_size, idx)
 
                         cost = network.test(images, with_update=False)
                         total_test_costs.append(cost)
