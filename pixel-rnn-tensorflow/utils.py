@@ -35,7 +35,7 @@ def get_timestamp():
     return now.strftime('%Y_%m_%d_%H_%M_%S')
 
 def binarize(images):
-    return (np.random.uniform(size=images.shape) < images).astype('float32')
+    return (np.full(images.shape, 0.5) < images).astype('float32')
 
 def save_images(images, height, width, n_row, n_col, 
             cmin=0.0, cmax=1.0, directory="./", prefix="sample"):
