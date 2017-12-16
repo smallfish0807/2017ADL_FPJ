@@ -157,7 +157,7 @@ class Network:
         return samples
 
     def generate_half(self, images):
-        samples = images
+        samples = images.copy()
         height_begin = self.height // 2
         samples[:, height_begin:, :, :] = 0. # remove lower half of images
 
