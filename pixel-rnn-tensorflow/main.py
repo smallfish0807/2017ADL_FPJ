@@ -17,18 +17,17 @@ flags = tf.app.flags
 flags.DEFINE_string("model", "pixel_cnn", "name of model [pixel_rnn, pixel_cnn]")
 flags.DEFINE_integer("batch_size", 100, "size of a batch")
 flags.DEFINE_integer("hidden_dims", 16, "dimesion of hidden states of LSTM or Conv layers")
-flags.DEFINE_integer("recurrent_length", 7, "the length of LSTM or Conv layers")
+flags.DEFINE_integer("recurrent_length", 1, "the length of LSTM or Conv layers")
 flags.DEFINE_integer("out_hidden_dims", 32, "dimesion of hidden states of output Conv layers")
 flags.DEFINE_integer("out_recurrent_length", 2, "the length of output Conv layers")
 flags.DEFINE_boolean("use_residual", False, "whether to use residual connections or not")
 # flags.DEFINE_boolean("use_dynamic_rnn", False, "whether to use dynamic_rnn or not")
 
 # training
-#flags.DEFINE_integer("max_epoch", 100000, "# of step in an epoch")
-flags.DEFINE_integer("max_epoch", 3, "# of step in an epoch")
-flags.DEFINE_integer("test_step", 100, "# of step to test a model")
-flags.DEFINE_integer("save_step", 1000, "# of step to save a model")
-flags.DEFINE_float("learning_rate", 1e-3, "learning rate")
+flags.DEFINE_integer("max_epoch", 100000, "# of step in an epoch")
+flags.DEFINE_integer("test_step", 1, "# of step to test a model")
+flags.DEFINE_integer("save_step", 1, "# of step to save a model")
+flags.DEFINE_float("learning_rate", 5e-6, "learning rate")
 flags.DEFINE_float("grad_clip", 1, "value of gradient to be used for clipping")
 flags.DEFINE_boolean("use_gpu", True, "whether to use gpu for training")
 
@@ -57,13 +56,10 @@ def main(_):
     model_dir = get_model_dir(conf,
             ['data_dir', 'sample_dir', 'max_epoch', 'test_step', 'save_step',
              'is_train', 'random_seed', 'log_level', 'display'])
-    print('model_dir:', model_dir)
     preprocess_conf(conf)
 
     DATA_DIR = os.path.join(conf.data_dir, conf.data)
     SAMPLE_DIR = os.path.join(conf.sample_dir, conf.data, model_dir)
-    print('DATA_DIR:', DATA_DIR)
-    print('SAMPLE_DIR:', SAMPLE_DIR)
 
     check_and_create_dir(DATA_DIR)
     check_and_create_dir(SAMPLE_DIR)
@@ -78,8 +74,8 @@ def main(_):
 
         height, width, channel = 28, 28, 1
 
-        train_step_per_epoch = mnist.train.num_examples / conf.batch_size
-        test_step_per_epoch = mnist.test.num_examples / conf.batch_size
+        train_step_per_epoch = int(mnist.train.num_examples / conf.batch_size)
+        test_step_per_epoch = int(mnist.test.num_examples / conf.batch_size)
     elif conf.data == "cifar":
         from cifar10 import IMAGE_SIZE, inputs
 
@@ -89,15 +85,16 @@ def main(_):
 
         height, width, channel = IMAGE_SIZE, IMAGE_SIZE, 3
     elif conf.data == 'imageNet':
-        images_all_train = get_all_imageNet_images('../data_small/train_32x32/')
-        images_all_test = get_all_imageNet_images('../data_small/valid_32x32/')
-        np.save('./npy/images_all_train_small', images_all_train)
-        np.save('./npy/images_all_valid_small', images_all_test)
-        #images_all_train = np.load('./npy/images_all_train_small.npy')
-        #images_all_test = np.load('./npy/images_all_valid_small.npy')
+        #images_all = get_all_imageNet_images('./data/valid_32x32/')
+        #np.save('./npy/images_all_valid', images_all)
+        images_all = np.load('./npy/images_all_valid.npy')
+        np.random.shuffle(images_all)
+
+        images_all_train = images_all[1000:]
+        images_all_test = images_all[:1000]
         height, width, channel = 32, 32, 1
-        train_step_per_epoch = images_all_train.shape[0] / conf.batch_size
-        test_step_per_epoch = images_all_test.shape[0] / conf.batch_size
+        train_step_per_epoch = int(images_all_train.shape[0] / conf.batch_size)
+        test_step_per_epoch = int(images_all_test.shape[0] / conf.batch_size)
 
 
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.1)
@@ -111,46 +108,49 @@ def main(_):
             logger.info("Training starts!")
 
             initial_step = stat.get_t() if stat else 0
-            iterator = trange(conf.max_epoch, ncols=70, initial=initial_step)
 
-            for epoch in iterator:
+            for epoch in range(initial_step, conf.max_epoch):
                 # 1. train
                 total_train_costs = []
-                for idx in xrange(train_step_per_epoch):
+                for idx in range(train_step_per_epoch):
                     if conf.data == "mnist":
                         #next_train_batch(conf.batch_size).shape: (100, 784)
                         images = binarize(next_train_batch(conf.batch_size)) \
                             .reshape([conf.batch_size, height, width, channel])
                     elif conf.data == 'imageNet':
-                        images = binarize(get_batch(images_all_train, conf.batch_size, epoch))
+                        #images = binarize(get_batch(images_all_train, conf.batch_size, idx))
+                        images = get_batch(images_all_train, conf.batch_size, idx)
 
 
                     cost = network.test(images, with_update=True)
                     total_train_costs.append(cost)
 
+                #logger.info('epoch: '+str(epoch)+' => '+' train l: '+str(np.mean(total_train_costs)))
                 # 2. test
-                total_test_costs = []
-                for idx in xrange(test_step_per_epoch):
-                    if conf.data == "mnist":
-                        images = binarize(next_test_batch(conf.batch_size)) \
-                            .reshape([conf.batch_size, height, width, channel])
-                    elif conf.data == 'imageNet':
-                        images = binarize(get_batch(images_all_test, conf.batch_size, epoch))
+                if epoch % conf.test_step == 0:
+                    total_test_costs = []
+                    for idx in range(test_step_per_epoch):
+                        if conf.data == "mnist":
+                            images = binarize(next_test_batch(conf.batch_size)) \
+                                .reshape([conf.batch_size, height, width, channel])
+                        elif conf.data == 'imageNet':
+                            #images = binarize(get_batch(images_all_test, conf.batch_size, idx))
+                            images = get_batch(images_all_test, conf.batch_size, idx)
 
-                    cost = network.test(images, with_update=False)
-                    total_test_costs.append(cost)
+                        cost = network.test(images, with_update=False)
+                        total_test_costs.append(cost)
 
-                avg_train_cost, avg_test_cost = np.mean(total_train_costs), np.mean(total_test_costs)
+                    avg_train_cost, avg_test_cost = np.mean(total_train_costs), np.mean(total_test_costs)
+                    logger.info('epoch: '+str(epoch)+' => '+' train l: '+str(avg_train_cost)+' test l: '+str(avg_test_cost))
 
-                stat.on_step(avg_train_cost, avg_test_cost)
+                    # stat and save model
+                    #if epoch % conf.save_step == 0:
+                        #stat.on_step(avg_train_cost, avg_test_cost)
 
                 # 3. generate samples
                 samples = network.generate()
-                save_images(samples, height, width, 10, 10,
-                        directory=SAMPLE_DIR, prefix="epoch_%s" % epoch)
+                save_images(samples, height, width, 10, 10, directory=SAMPLE_DIR, prefix="epoch_%s" % epoch)
 
-                iterator.set_description("train l: %.3f, test l: %.3f" % (avg_train_cost, avg_test_cost))
-                print
         else:
             logger.info("Image generation starts!")
 
