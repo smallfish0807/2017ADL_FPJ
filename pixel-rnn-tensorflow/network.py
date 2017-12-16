@@ -149,10 +149,6 @@ class Network:
 
         return samples
 
-    def test_generate(self, images):
-        out = self.sess.run(self.l['output'], feed_dict={ self.l['inputs']: images })
-        return out
-
     def generate_half(self, images):
         samples = images
         height_begin = self.height // 2
