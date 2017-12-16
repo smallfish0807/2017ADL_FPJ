@@ -133,6 +133,7 @@ def main(_):
                 # 2. test
                 if epoch % conf.test_step == 0:
                     total_test_costs = []
+                    total_ce = []
                     for idx in range(test_step_per_epoch):
                         if conf.data == "mnist":
                             images = binarize(next_test_batch(conf.batch_size)) \
@@ -153,9 +154,14 @@ def main(_):
                             test_out_half = network.generate_half(images)
                             save_images(test_out_half, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_out_half_epoch_%s" % epoch)
 
+                        # count CE(images, test_out_half)
+                        test_out_half = network.generate_half(images)
+                        ce = network.count_ce(images, test_out_half)
+                        total_ce.append(ce)
+
                     #print('total_train_costs=', total_train_costs, ' total_test_costs=', total_test_costs)
-                    avg_train_cost, avg_test_cost = np.mean(total_train_costs), np.mean(total_test_costs)
-                    logger.info('epoch: '+str(epoch)+' => '+' train l: '+str(avg_train_cost)+' test l: '+str(avg_test_cost))
+                    avg_train_cost, avg_test_cost, avg_ce = np.mean(total_train_costs), np.mean(total_test_costs), np.mean(total_ce)
+                    logger.info('epoch: '+str(epoch)+' => '+' train l: '+str(avg_train_cost)+' test l: '+str(avg_test_cost)+' CE: '+str(avg_ce))
 
                     # stat and save model
                     #if epoch % conf.save_step == 0:

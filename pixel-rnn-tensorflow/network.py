@@ -117,6 +117,9 @@ class Network:
                 [(tf.clip_by_value(gv[0], -conf.grad_clip, conf.grad_clip), gv[1]) for gv in grads_and_vars]
         self.optim = optimizer.apply_gradients(new_grads_and_vars)
 
+        # CE
+        self.ce = tf.reduce_mean(-tf.reduce_sum(self.l['inputs'] * tf.log(self.l['output']), reduction_indices=[1]))
+
         show_all_variables()
 
         logger.info("Building %s finished!" % conf.model)
@@ -166,3 +169,8 @@ class Network:
                         mprint(next_sample[0,:,:,:])
 
         return samples
+
+    def count_ce(self, y_true, y_pred):
+        y_pred[y_pred == 0] = 1e-10 #SMALL_NUM
+        return self.sess.run(self.ce, {self.l['inputs']: y_true, self.l['output']: y_pred})
+
