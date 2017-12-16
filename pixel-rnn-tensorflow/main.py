@@ -183,4 +183,5 @@ def main(_):
             save_images(samples, height, width, 10, 10, directory=SAMPLE_DIR)
 
 
-if __name__ == 
+if __name__ == 'main':
+    tf.app.run() 
