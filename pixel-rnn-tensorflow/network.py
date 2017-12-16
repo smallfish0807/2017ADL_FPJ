@@ -30,6 +30,7 @@ class Network:
         self.l = {}
 
         self.l['inputs'] = tf.placeholder(tf.float32, [None, height, width, channel],)
+        self.l['predict_half'] = tf.placeholder(tf.float32, [None, height, width, channel],)
 
         if conf.data =='mnist' or conf.data == 'imageNet':
             self.l['normalized_inputs'] = self.l['inputs']
@@ -119,7 +120,7 @@ class Network:
         self.optim = optimizer.apply_gradients(new_grads_and_vars)
 
         # CE
-        self.ce = tf.reduce_mean(-tf.reduce_sum(self.l['inputs'] * tf.log(self.l['output']), reduction_indices=[1]))
+        self.ce = tf.reduce_mean(-tf.reduce_sum(self.l['inputs'] * tf.log(self.l['predict_half']), reduction_indices=[1,2,3]))
 
         show_all_variables()
 
@@ -177,5 +178,5 @@ class Network:
 
     def count_ce(self, y_true, y_pred):
         y_pred[y_pred == 0] = 1e-10 #SMALL_NUM
-        return self.sess.run(self.ce, {self.l['inputs']: y_true, self.l['output']: y_pred})
+        return self.sess.run(self.ce, {self.l['inputs']: y_true, self.l['predict_half']: y_pred})
 
