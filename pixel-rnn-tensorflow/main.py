@@ -91,8 +91,8 @@ def main(_):
     elif conf.data == 'imageNet':
         images_all_train = get_all_imageNet_images('../data_small/train_32x32/')
         images_all_test = get_all_imageNet_images('../data_small/valid_32x32/')
-        np.save('./npy/images_all_train_small', images_all_train)
-        np.save('./npy/images_all_valid_small', images_all_test)
+        #np.save('./npy/images_all_train_small', images_all_train)
+        #np.save('./npy/images_all_valid_small', images_all_test)
         #images_all_train = np.load('./npy/images_all_train_small.npy')
         #images_all_test = np.load('./npy/images_all_valid_small.npy')
         height, width, channel = 32, 32, 1
