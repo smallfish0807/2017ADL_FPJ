@@ -27,7 +27,7 @@ flags.DEFINE_boolean("use_residual", False, "whether to use residual connections
 flags.DEFINE_integer("max_epoch", 100000, "# of step in an epoch")
 flags.DEFINE_integer("test_step", 1, "# of step to test a model")
 flags.DEFINE_integer("save_step", 1, "# of step to save a model")
-flags.DEFINE_float("learning_rate", 5e-6, "learning rate")
+flags.DEFINE_float("learning_rate", 1e-3, "learning rate")
 flags.DEFINE_float("grad_clip", 1, "value of gradient to be used for clipping")
 flags.DEFINE_boolean("use_gpu", True, "whether to use gpu for training")
 
@@ -56,10 +56,13 @@ def main(_):
     model_dir = get_model_dir(conf,
             ['data_dir', 'sample_dir', 'max_epoch', 'test_step', 'save_step',
              'is_train', 'random_seed', 'log_level', 'display'])
+    print('model_dir:', model_dir)
     preprocess_conf(conf)
 
     DATA_DIR = os.path.join(conf.data_dir, conf.data)
     SAMPLE_DIR = os.path.join(conf.sample_dir, conf.data, model_dir)
+    print('DATA_DIR:', DATA_DIR)
+    print('SAMPLE_DIR:', SAMPLE_DIR)
 
     check_and_create_dir(DATA_DIR)
     check_and_create_dir(SAMPLE_DIR)
@@ -140,6 +143,12 @@ def main(_):
                         cost = network.test(images, with_update=False)
                         total_test_costs.append(cost)
 
+                        if epoch % 10 == 0 and idx == 0:
+                            save_images(images, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_ori_epoch_%s" % epoch)
+                            test_out = network.test_generate(images)
+                            save_images(test_out, height, width, 10, 10, directory=SAMPLE_DIR, prefix="test_out_epoch_%s" % epoch)
+
+                    #print('total_train_costs=', total_train_costs, ' total_test_costs=', total_test_costs)
                     avg_train_cost, avg_test_cost = np.mean(total_train_costs), np.mean(total_test_costs)
                     logger.info('epoch: '+str(epoch)+' => '+' train l: '+str(avg_train_cost)+' test l: '+str(avg_test_cost))
 
