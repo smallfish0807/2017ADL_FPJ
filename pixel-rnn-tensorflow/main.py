@@ -17,7 +17,7 @@ flags = tf.app.flags
 flags.DEFINE_string("model", "pixel_cnn", "name of model [pixel_rnn, pixel_cnn]")
 flags.DEFINE_integer("batch_size", 100, "size of a batch")
 flags.DEFINE_integer("hidden_dims", 16, "dimesion of hidden states of LSTM or Conv layers")
-flags.DEFINE_integer("recurrent_length", 1, "the length of LSTM or Conv layers")
+flags.DEFINE_integer("recurrent_length", 7, "the length of LSTM or Conv layers")
 flags.DEFINE_integer("out_hidden_dims", 32, "dimesion of hidden states of output Conv layers")
 flags.DEFINE_integer("out_recurrent_length", 2, "the length of output Conv layers")
 flags.DEFINE_boolean("use_residual", False, "whether to use residual connections or not")
