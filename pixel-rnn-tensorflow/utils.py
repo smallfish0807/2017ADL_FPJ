@@ -52,7 +52,7 @@ def get_model_dir(config, exceptions=None):
     pp(attrs)
 
     keys = attrs.keys()
-    keys.sort()
+    keys = sorted(keys)
     keys.remove('data')
     keys = ['data'] + keys
 

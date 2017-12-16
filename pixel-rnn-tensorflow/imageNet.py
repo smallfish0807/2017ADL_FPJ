@@ -23,4 +23,4 @@ def get_all_imageNet_images(file_path):
     return np.asarray(images_all)
 
 def get_batch(images_all, batch_size, i):
-    return images_all[i*batch_size+1: (i+1)*batch_size]
+    return images_all[i*batch_size: (i+1)*batch_size]

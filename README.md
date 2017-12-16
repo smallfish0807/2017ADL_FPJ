@@ -20,6 +20,7 @@ python2 main.py --data=imageNet --model=pixel_cnn --hidden_dims=64 --recurrent_l
 
 ## HACKMD
 FPJ proposal: https://hackmd.io/GwMwnADARgTAhhAtMAjAdgMaICwQKYiJQoQAciAJmscGiAKwrZ5hA===  
+FPJ progress report: https://hackmd.io/KYFmCMHYBMGYDYC0BOAhsAZokkAcIU4AmRI4eeABl3HhHg1yA===  
 
 ## Data
 Downsampled ImageNet: http://image-net.org/small/download.php  
