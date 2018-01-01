@@ -28,6 +28,9 @@ class Network:
         else:
             raise ValueError("Unknown data_format: %s" % data_format)
 
+        if conf.use_discrete:
+            channel = 256
+
         self.l = {}
 
         self.l['inputs'] = tf.placeholder(tf.float32, [None, height, width, channel],)
@@ -76,6 +79,16 @@ class Network:
             # self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
             #         self.l['conv2d_out_logits'], self.l['normalized_inputs'], name='loss'))
             self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+                    logits=self.l['conv2d_out_logits'], labels=self.l['normalized_inputs'], name='loss'))
+        elif channel == 256:
+            self.l['conv2d_out_logits'] = conv2d(l_hid, 256, [1, 1], "B", scope='conv2d_out_logits')
+            self.l['output'] = tf.nn.softmax(self.l['conv2d_out_logits'])
+
+            logger.info("Building loss and optims")
+            # FIXED pre-1.0
+            # self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            #         self.l['conv2d_out_logits'], self.l['normalized_inputs'], name='loss'))
+            self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.l['conv2d_out_logits'], labels=self.l['normalized_inputs'], name='loss'))
         else:
             #raise ValueError("Implementation in progress for RGB colors")
