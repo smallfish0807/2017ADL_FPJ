@@ -15,6 +15,7 @@ class Network:
         self.height, self.width, self.channel = height, width, channel
         self.height_begin = self.height // 2
         self.use_binarize = conf.use_binarize
+        self.use_discrete = conf.use_discrete
 
         if conf.use_gpu:
             data_format = "NHWC"
@@ -154,39 +155,39 @@ class Network:
         return cost
 
     def generate(self):
-        samples = np.zeros((100, self.height, self.width, 1), dtype='float32')
+        samples = np.zeros((100, self.height, self.width, self.channel), dtype='float32')
 
         for i in range(self.height):
             for j in range(self.width):
-                for k in range(self.channel):
-                    if self.use_binarize:
-                        next_sample = binarize(self.predict(samples))
-                    else:
-                        next_sample = self.predict(samples)
-                    samples[:, i, j, k] = next_sample[:, i, j, k]
+                if self.use_binarize:
+                    next_sample = binarize(self.predict(samples))
+                else:
+                    next_sample = self.predict(samples)
+                samples[:, i, j, :] = next_sample[:, i, j, :]
 
-                    if self.data == 'mnist':
-                        print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
-                        mprint(next_sample[0,:,:,:])
+                if self.data == 'mnist':
+                    print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
+                    mprint(next_sample[0,:,:,:])
 
         return samples
 
     def generate_half(self, images):
         samples = images.copy()
         samples[:, self.height_begin:, :, :] = 0. # remove lower half of images
+        #if self.use_discrete:
+        #    samples[:, self.height_begin:, :, 0] = 1
 
         for i in range(self.height_begin, self.height):
             for j in range(self.width):
-                for k in range(self.channel):
-                    if self.use_binarize:
-                        next_sample = binarize(self.predict(samples))
-                    else:
-                        next_sample = self.predict(samples)
-                    samples[:, i, j, k] = next_sample[:, i, j, k]
+                if self.use_binarize:
+                    next_sample = binarize(self.predict(samples))
+                else:
+                    next_sample = self.predict(samples)
+                samples[:, i, j, :] = next_sample[:, i, j, :]
 
-                    if self.data == 'mnist':
-                        print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
-                        mprint(next_sample[0,:,:,:])
+                if self.data == 'mnist':
+                    print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
+                    mprint(next_sample[0,:,:,:])
 
         return samples
 
