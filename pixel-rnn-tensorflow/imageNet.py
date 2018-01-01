@@ -23,9 +23,10 @@ def prepro_discrete(o):
     y = y.astype(np.uint8)
     resized = scipy.misc.imresize(y, o.shape[:-1])
     return to_categorical(resized, 256)
+
 def prob2image(images, use_discrete=False):
     if use_discrete:
-        return np.argmax(images, axis=3)
+        return np.argmax(images, axis=3).astype(np.float32) / 255
     else:
         return images
 
@@ -38,8 +39,6 @@ def get_all_imageNet_images(file_path, use_discrete=False):
             images_all.append(prepro_discrete(I))
         else:
             images_all.append(prepro(I))
-        if i % 100 == 0:
-            print(i, end=' ')
     return np.asarray(images_all)
 
 def get_batch(images_all, batch_size, i):
