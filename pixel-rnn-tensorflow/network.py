@@ -15,6 +15,7 @@ class Network:
         self.height, self.width, self.channel = height, width, channel
         self.height_begin = self.height // 2
         self.use_binarize = conf.use_binarize
+        self.use_discrete = conf.use_discrete
 
         if conf.use_gpu:
             data_format = "NHWC"
@@ -27,6 +28,9 @@ class Network:
             input_shape = [None, channel, height, width]
         else:
             raise ValueError("Unknown data_format: %s" % data_format)
+
+        if conf.use_discrete:
+            channel = 256
 
         self.l = {}
 
@@ -76,6 +80,16 @@ class Network:
             # self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
             #         self.l['conv2d_out_logits'], self.l['normalized_inputs'], name='loss'))
             self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+                    logits=self.l['conv2d_out_logits'], labels=self.l['normalized_inputs'], name='loss'))
+        elif channel == 256:
+            self.l['conv2d_out_logits'] = conv2d(l_hid, 256, [1, 1], "B", scope='conv2d_out_logits')
+            self.l['output'] = tf.nn.softmax(self.l['conv2d_out_logits'])
+
+            logger.info("Building loss and optims")
+            # FIXED pre-1.0
+            # self.loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            #         self.l['conv2d_out_logits'], self.l['normalized_inputs'], name='loss'))
+            self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
                     logits=self.l['conv2d_out_logits'], labels=self.l['normalized_inputs'], name='loss'))
         else:
             #raise ValueError("Implementation in progress for RGB colors")
@@ -141,39 +155,39 @@ class Network:
         return cost
 
     def generate(self):
-        samples = np.zeros((100, self.height, self.width, 1), dtype='float32')
+        samples = np.zeros((100, self.height, self.width, self.channel), dtype='float32')
 
         for i in range(self.height):
             for j in range(self.width):
-                for k in range(self.channel):
-                    if self.use_binarize:
-                        next_sample = binarize(self.predict(samples))
-                    else:
-                        next_sample = self.predict(samples)
-                    samples[:, i, j, k] = next_sample[:, i, j, k]
+                if self.use_binarize:
+                    next_sample = binarize(self.predict(samples))
+                else:
+                    next_sample = self.predict(samples)
+                samples[:, i, j, :] = next_sample[:, i, j, :]
 
-                    if self.data == 'mnist':
-                        print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
-                        mprint(next_sample[0,:,:,:])
+                if self.data == 'mnist':
+                    print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
+                    mprint(next_sample[0,:,:,:])
 
         return samples
 
     def generate_half(self, images):
         samples = images.copy()
         samples[:, self.height_begin:, :, :] = 0. # remove lower half of images
+        #if self.use_discrete:
+        #    samples[:, self.height_begin:, :, 0] = 1
 
         for i in range(self.height_begin, self.height):
             for j in range(self.width):
-                for k in range(self.channel):
-                    if self.use_binarize:
-                        next_sample = binarize(self.predict(samples))
-                    else:
-                        next_sample = self.predict(samples)
-                    samples[:, i, j, k] = next_sample[:, i, j, k]
+                if self.use_binarize:
+                    next_sample = binarize(self.predict(samples))
+                else:
+                    next_sample = self.predict(samples)
+                samples[:, i, j, :] = next_sample[:, i, j, :]
 
-                    if self.data == 'mnist':
-                        print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
-                        mprint(next_sample[0,:,:,:])
+                if self.data == 'mnist':
+                    print("=" * (int(self.width/2)), "(%2d, %2d)" % (i, j), "=" * (int(self.width/2)))
+                    mprint(next_sample[0,:,:,:])
 
         return samples
 
