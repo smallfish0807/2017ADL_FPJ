@@ -2,7 +2,11 @@
 ## Install packages
 python: 3.5.2  
 tensorflow: 1.4.1  
+pytorch: 0.3.0.post4  
 pillow  
+visdom  
+dominate  
+
 
 ## Run
 python3.5 main.py --data=imageNet --model=pixel_cnn --hidden_dims=64 --recurrent_length=2 --out_hidden_dims=64  
@@ -25,5 +29,9 @@ FPJ progress report: https://hackmd.io/KYFmCMHYBMGYDYC0BOAhsAZokkAcIU4AmRI4eeABl
 Downsampled ImageNet: http://image-net.org/small/download.php  
 
 ## Ref
-Paper: [Aaron van den Oord, Nal Kalchbrenner, Koray Kavukcuoglu, Pixel Recurrent Neural Networks](https://arxiv.org/pdf/1601.06759.pdf)  
-Github: [carpedm20/pixel-rnn-tensorflow](https://github.com/carpedm20/pixel-rnn-tensorflow)  
+- Paper   
+[Aaron van den Oord, Nal Kalchbrenner, Koray Kavukcuoglu, Pixel Recurrent Neural Networks](https://arxiv.org/pdf/1601.06759.pdf)  
+[Image-to-Image Translation with Conditional Adversarial Networks](https://arxiv.org/pdf/1611.07004v1.pdf)  
+- Github  
+[carpedm20/pixel-rnn-tensorflow](https://github.com/carpedm20/pixel-rnn-tensorflow)  
+[junyanz/pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)  
