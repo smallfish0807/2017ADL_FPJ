@@ -54,13 +54,13 @@ parser.add_argument('-b', '--batch_size', type=int, default=12,
                     help='Batch size during training per GPU')
 parser.add_argument('-a', '--init_batch_size', type=int, default=100,
                     help='How much data to use for data-dependent initialization.')
-parser.add_argument('-p', '--dropout_p', type=float, default=0.75,
+parser.add_argument('-p', '--dropout_p', type=float, default=0.5,
                     help='Dropout strength (i.e. 1 - keep_prob). 0 = No dropout, higher = more dropout.')
 parser.add_argument('-x', '--max_epochs', type=int,
                     default=5000, help='How many epochs to run in total?')
 parser.add_argument('-g', '--nr_gpu', type=int, default=1,
                     help='How many GPUs to distribute the training across?')
-parser.add_argument('--gpu_memory', type=float, default=0.5, help='Used percentage of GPU memory.')
+parser.add_argument('--gpu_memory', type=float, default=0.75, help='Used percentage of GPU memory.')
 
 # evaluation
 parser.add_argument('--polyak_decay', type=float, default=0.9995,
