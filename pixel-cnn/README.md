@@ -9,19 +9,16 @@
 python train.py
 
 ## Parameters you might want to change
-- data_dir
-- save_dir
-- nr_gpu
-- gpu_memory
+- data_dir default='./Data'
+- save_dir default='./Save'
+- nr_gpu default=1
+- gpu_memory default=0.75
 
 ## References
-- [PixelCNN++](https://openreview.net/pdf?id=BJrFC6ceg)
+- [PixelCNN++ paper](https://openreview.net/pdf?id=BJrFC6ceg)
 - [Original Implementation](https://github.com/openai/pixel-cnn)
 
 ## Citation
-
-If you find this code useful please cite us in your work:
-
 ```
 @inproceedings{Salimans2016PixeCNN,
   title={PixelCNN++: A PixelCNN Implementation with Discretized Logistic Mixture Likelihood and Other Modifications},
