@@ -24,7 +24,7 @@ class AlignedDataset(BaseDataset):
         self.transform = transforms.Compose(transform_list)
 
     def __getitem__(self, index):
-        # change AB to A & no crop
+        # Modify by me: change AB to A & no crop
         # A: full, B: half
         AB_path = self.AB_paths[index]
         A = Image.open(AB_path).convert('RGB')
