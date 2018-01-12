@@ -1,1 +1,1 @@
-python3.5 train.py --dataroot ../data_medium/ --name pix2pix --model pix2pix --which_model_netG unet_32 --which_direction BtoA --lambda_A 100 --dataset_mode aligned --no_lsgan --norm batch --pool_size 0
+python3.5 train.py --dataroot ../data_large/ --name pix2pix --model pix2pix --which_model_netG unet_32 --which_direction BtoA --lambda_A 100 --dataset_mode aligned --no_lsgan --norm batch --pool_size 0
