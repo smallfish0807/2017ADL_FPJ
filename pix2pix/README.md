@@ -5,3 +5,6 @@
 # train and test
 ./scripts/train_pix2pix.sh  
 ./scripts/test_pix2pix.sh  
+
+# model
+./checkpoints/XX.pth  
