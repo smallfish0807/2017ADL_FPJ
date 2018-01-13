@@ -1,8 +1,10 @@
+import numpy as np
 import time
 import os
 from options.test_options import TestOptions
 from data.data_loader import CreateDataLoader
 from models.models import create_model
+from util import util
 
 opt = TestOptions().parse()
 opt.nThreads = 1   # test code only supports nThreads = 1
@@ -15,6 +17,13 @@ dataset = data_loader.load_data()
 model = create_model(opt)
 # test
 
+# Create or clear dir for saving generated samples
+if os.path.exists(opt.testing_path):
+    shutil.rmtree(opt.testing_path)
+
+os.makedirs(opt.testing_path)
+img_comb = {}
+img_comb_row = {}
 for j,data in enumerate(dataset):
     model.set_input(data)
     model.test()
@@ -33,6 +42,6 @@ for j,data in enumerate(dataset):
 
 # Save
 for label, image_numpy in img_comb.items():
-    image_name = '%s_%s.png' % (epoch, label)
+    image_name = '%s_%s.png' % (opt.which_epoch, label)
     save_path = os.path.join(opt.testing_path, image_name)
     util.save_image(image_numpy, save_path)

@@ -1,1 +1,1 @@
-python3.5 test.py --dataroot ../data_large/ --name pix2pix --model pix2pix --which_model_netG unet_256 --which_model_netD pixel --which_direction BtoA --dataset_mode aligned --norm batch --which_epoch 17
+python3.5 test.py --dataroot ../data_large/ --name pix2pix --model pix2pix --which_model_netG unet_32 --which_model_netD pixel --which_direction BtoA --dataset_mode aligned --norm batch --which_epoch 17 --testing_path testing_sample_dir
