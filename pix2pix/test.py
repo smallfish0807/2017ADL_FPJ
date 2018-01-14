@@ -5,6 +5,7 @@ from options.test_options import TestOptions
 from data.data_loader import CreateDataLoader
 from models.models import create_model
 from util import util
+import shutil
 
 opt = TestOptions().parse()
 opt.nThreads = 1   # test code only supports nThreads = 1
