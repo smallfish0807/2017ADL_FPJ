@@ -25,8 +25,8 @@ import data.imagenet_data as imagenet_data
 parser = argparse.ArgumentParser()
 # data I/O
 parser.add_argument('-i', '--data_dir', type=str,
-                    default='/tmp2/smallfishyo/pixelcnn/data', help='Location for the dataset')
-parser.add_argument('-o', '--save_dir', type=str, default='/tmp2/smallfishyo/pixelcnn/save2',
+                    default='../data', help='Location for the dataset')
+parser.add_argument('-o', '--save_dir', type=str, default='../save',
                     help='Location for parameter checkpoints and samples')
 parser.add_argument('-d', '--data_set', type=str,
                     default='imagenet', help='Can be either cifar|imagenet')
@@ -60,7 +60,7 @@ parser.add_argument('-x', '--max_epochs', type=int,
                     default=5000, help='How many epochs to run in total?')
 parser.add_argument('-g', '--nr_gpu', type=int, default=1,
                     help='How many GPUs to distribute the training across?')
-parser.add_argument('--gpu_memory', type=float, default=0.25, help='Used percentage of GPU memory.')
+parser.add_argument('--gpu_memory', type=float, default=0.5, help='Used percentage of GPU memory.')
 
 # evaluation
 parser.add_argument('--polyak_decay', type=float, default=0.9995,
