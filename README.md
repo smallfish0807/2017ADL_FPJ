@@ -15,15 +15,15 @@ Downsampled ImageNet: http://image-net.org/small/download.php
 
 ## How to execute
 
-### pix2pix training
-pix2pix/scripts/train_pix2pix.sh
-### pix2pix testing
-pix2pix/scripts/test_pix2pix.sh
-
 ### pixel-cnn++ training
 python3.5 pixel-cnn/train.py
 ### pixel-cnn++ testing
 python3.5 pixel-cnn/generate.py --load_params=save/params_imagenet.ckpt
+
+### pix2pix training
+pix2pix/scripts/train_pix2pix.sh
+### pix2pix testing
+pix2pix/scripts/test_pix2pix.sh
 
 ## Plan
 11/25 Survey paper + learn corresponding techniques  
