@@ -9,10 +9,10 @@
 python train.py
 
 ## Parameters you might want to change
-- data_dir default='./Data'
-- save_dir default='./Save'
+- data_dir default='../data'
+- save_dir default='../save'
 - nr_gpu default=1
-- gpu_memory default=0.75
+- gpu_memory default=0.5
 
 ## References
 - [PixelCNN++ paper](https://openreview.net/pdf?id=BJrFC6ceg)
