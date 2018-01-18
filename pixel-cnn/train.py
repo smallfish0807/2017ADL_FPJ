@@ -25,7 +25,7 @@ import data.imagenet_data as imagenet_data
 parser = argparse.ArgumentParser()
 # data I/O
 parser.add_argument('-i', '--data_dir', type=str,
-                    default='../data', help='Location for the dataset')
+                    default='../data_large', help='Location for the dataset')
 parser.add_argument('-o', '--save_dir', type=str, default='../save',
                     help='Location for parameter checkpoints and samples')
 parser.add_argument('-d', '--data_set', type=str,

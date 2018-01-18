@@ -38,7 +38,7 @@ def maybe_download_and_extract(data_dir):
         fetch(train_url, filepath)
         print('unpacking the tar file', filepath)
         tarfile.open(filepath, 'r').extractall(data_dir) # creates the train_32x32 folder
-    
+    os.rename(train_dir, os.path.join(data_dir, 'train'))
 
     test_dir = os.path.join(data_dir, 'valid_32x32')
     if not os.path.exists(test_dir):
@@ -47,6 +47,7 @@ def maybe_download_and_extract(data_dir):
         fetch(test_url, filepath)
         print('unpacking the tar file', filepath)
         tarfile.open(filepath, 'r').extractall(data_dir) # creates the valid_32x32 folder
+    os.rename(test_dir, os.path.join(data_dir, 'test'))
 
 def maybe_preprocess(data_dir):
 
@@ -57,7 +58,7 @@ def maybe_preprocess(data_dir):
 
     
     trainx = []
-    train_dir = os.path.join(data_dir, 'train_32x32')
+    train_dir = os.path.join(data_dir, 'train')
     for f in os.listdir(train_dir):
         if f.endswith('.png'):
             #print('reading', f)
@@ -67,7 +68,7 @@ def maybe_preprocess(data_dir):
     
 
     testx = []
-    test_dir = os.path.join(data_dir, 'valid_32x32')
+    test_dir = os.path.join(data_dir, 'test')
     for f in os.listdir(test_dir):
         if f.endswith('.png'):
             #print('reading', f)
@@ -110,7 +111,7 @@ class DataLoader(object):
         self.batch_size = batch_size
         self.shuffle = shuffle
 
-        self.data = load(os.path.join(data_dir,'small_imagenet'), subset=subset)
+        self.data = load(data_dir, subset=subset)
         print(self.data.shape)
         
         self.p = 0 # pointer to where we are in iteration
