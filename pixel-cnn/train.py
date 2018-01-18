@@ -25,8 +25,8 @@ import data.imagenet_data as imagenet_data
 parser = argparse.ArgumentParser()
 # data I/O
 parser.add_argument('-i', '--data_dir', type=str,
-                    default='../data_large', help='Location for the dataset')
-parser.add_argument('-o', '--save_dir', type=str, default='../save',
+                    default='./data_large', help='Location for the dataset')
+parser.add_argument('-o', '--save_dir', type=str, default='./save',
                     help='Location for parameter checkpoints and samples')
 parser.add_argument('-d', '--data_set', type=str,
                     default='imagenet', help='Can be either cifar|imagenet')
@@ -315,6 +315,6 @@ with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
 
             # save params
             saver.save(sess, args.save_dir + '/params_' +
-                       args.data_set + '.ckpt' + epoch)
+                       args.data_set + '.ckpt')
             np.savez(args.save_dir + '/test_bpd_' + args.data_set +
                      '.npz', test_bpd=np.array(test_bpd))

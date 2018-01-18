@@ -25,14 +25,14 @@ import data.imagenet_data as imagenet_data
 parser = argparse.ArgumentParser()
 # data I/O
 parser.add_argument('-i', '--data_dir', type=str,
-                    default='../data_large', help='Location for the dataset')
-parser.add_argument('-o', '--save_dir', type=str, default='../save',
+                    default='./data_large', help='Location for the dataset')
+parser.add_argument('-o', '--save_dir', type=str, default='./save',
                     help='Location for parameter checkpoints and samples')
 parser.add_argument('-d', '--data_set', type=str,
                     default='imagenet', help='Can be either cifar|imagenet')
 parser.add_argument('-t', '--save_interval', type=int, default=1,
                     help='Every how many epochs to write checkpoint/samples?')
-parser.add_argument('-r', '--load_params', type=str, default=None,
+parser.add_argument('-r', '--load_params', type=str, default='save/params_imagenet.ckpt',
                     help='Restore training from which model checkpoint?')
 # model
 parser.add_argument('-q', '--nr_resnet', type=int, default=5,

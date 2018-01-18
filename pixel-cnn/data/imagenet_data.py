@@ -31,23 +31,23 @@ def maybe_download_and_extract(data_dir):
     # downloads and extracts the two tar files for train/val
 
     
-    train_dir = os.path.join(data_dir, 'train_32x32')
+    train_dir = os.path.join(data_dir, 'train')
     if not os.path.exists(train_dir):
         train_url = 'http://image-net.org/small/train_32x32.tar' # 4GB
         filepath = os.path.join(data_dir, 'train_32x32.tar')
         fetch(train_url, filepath)
         print('unpacking the tar file', filepath)
         tarfile.open(filepath, 'r').extractall(data_dir) # creates the train_32x32 folder
-    os.rename(train_dir, os.path.join(data_dir, 'train'))
+        os.rename(os.path.join(data_dir, 'train_32x32'), train_dir)
 
-    test_dir = os.path.join(data_dir, 'valid_32x32')
+    test_dir = os.path.join(data_dir, 'test')
     if not os.path.exists(test_dir):
         test_url = 'http://image-net.org/small/valid_32x32.tar' # 154MB
         filepath = os.path.join(data_dir, 'valid_32x32.tar')
         fetch(test_url, filepath)
         print('unpacking the tar file', filepath)
         tarfile.open(filepath, 'r').extractall(data_dir) # creates the valid_32x32 folder
-    os.rename(test_dir, os.path.join(data_dir, 'test'))
+        os.rename(os.path.join(data_dir, 'valid_32x32'), test_dir)
 
 def maybe_preprocess(data_dir):
 
