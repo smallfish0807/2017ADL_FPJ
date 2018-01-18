@@ -25,8 +25,8 @@ import data.imagenet_data as imagenet_data
 parser = argparse.ArgumentParser()
 # data I/O
 parser.add_argument('-i', '--data_dir', type=str,
-                    default='/tmp2/smallfishyo/pixelcnn/data', help='Location for the dataset')
-parser.add_argument('-o', '--save_dir', type=str, default='/tmp2/smallfishyo/pixelcnn/save2',
+                    default='../data', help='Location for the dataset')
+parser.add_argument('-o', '--save_dir', type=str, default='../save',
                     help='Location for parameter checkpoints and samples')
 parser.add_argument('-d', '--data_set', type=str,
                     default='imagenet', help='Can be either cifar|imagenet')
@@ -60,7 +60,7 @@ parser.add_argument('-x', '--max_epochs', type=int,
                     default=5000, help='How many epochs to run in total?')
 parser.add_argument('-g', '--nr_gpu', type=int, default=1,
                     help='How many GPUs to distribute the training across?')
-parser.add_argument('--gpu_memory', type=float, default=0.25, help='Used percentage of GPU memory.')
+parser.add_argument('--gpu_memory', type=float, default=0.5, help='Used percentage of GPU memory.')
 
 # evaluation
 parser.add_argument('--polyak_decay', type=float, default=0.9995,
@@ -70,6 +70,7 @@ parser.add_argument('-s', '--seed', type=int, default=1,
                     help='Random seed to use')
 # visialization
 parser.add_argument('--num_sample', type=int, default=100)
+parser.add_argument('--num_gen', type=int, default=1)
 
 args = parser.parse_args()
 print('input args:\n', json.dumps(vars(args), indent=4,
@@ -89,7 +90,7 @@ train_data = DataLoader(args.data_dir, 'train', args.batch_size * args.nr_gpu,
                         rng=rng, shuffle=True, return_labels=args.class_conditional)
 test_data = DataLoader(args.data_dir, 'test', args.batch_size *
                        args.nr_gpu, shuffle=False, return_labels=args.class_conditional)
-obs_shape = train_data.get_observation_size()  # e.g. a tuple (32,32,3)
+obs_shape = test_data.get_observation_size()  # e.g. a tuple (32,32,3)
 assert len(obs_shape) == 3, 'assumed right now'
 
 # data place holders
@@ -97,23 +98,10 @@ x_init = tf.placeholder(tf.float32, shape=(args.init_batch_size,) + obs_shape)
 xs = [tf.placeholder(tf.float32, shape=(args.batch_size, ) + obs_shape)
       for i in range(args.nr_gpu)]
 
-# if the model is class-conditional we'll set up label placeholders +
-# one-hot encodings 'h' to condition on
-if args.class_conditional:
-    num_labels = train_data.get_num_labels()
-    y_init = tf.placeholder(tf.int32, shape=(args.init_batch_size,))
-    h_init = tf.one_hot(y_init, num_labels)
-    y_sample = np.split(
-        np.mod(np.arange(args.batch_size * args.nr_gpu), num_labels), args.nr_gpu)
-    h_sample = [tf.one_hot(tf.Variable(
-        y_sample[i], trainable=False), num_labels) for i in range(args.nr_gpu)]
-    ys = [tf.placeholder(tf.int32, shape=(args.batch_size,))
-          for i in range(args.nr_gpu)]
-    hs = [tf.one_hot(ys[i], num_labels) for i in range(args.nr_gpu)]
-else:
-    h_init = None
-    h_sample = [None] * args.nr_gpu
-    hs = h_sample
+h_init = None
+h_sample = [None] * args.nr_gpu
+hs = h_sample
+
 print('Creating model')
 # create the model
 model_opt = {'nr_resnet': args.nr_resnet, 'nr_filters': args.nr_filters,
@@ -175,12 +163,14 @@ for i in range(args.nr_gpu):
 def sample_from_model(sess):
     x_gen = [np.zeros((args.batch_size,) + obs_shape, dtype=np.float32)
              for i in range(args.nr_gpu)]
+    #print('ori min =', np.min(x_gen), 'max =', np.max(x_gen), 'type =', x_gen[0].dtype)
     for yi in range(obs_shape[0]):
         for xi in range(obs_shape[1]):
             new_x_gen_np = sess.run(
                 new_x_gen, {xs[i]: x_gen[i] for i in range(args.nr_gpu)})
             for i in range(args.nr_gpu):
                 x_gen[i][:, yi, xi, :] = new_x_gen_np[i][:, yi, xi, :]
+    #print('ori min =', np.min(x_gen), 'max =', np.max(x_gen), 'type =', x_gen[0].dtype)
     return np.concatenate(x_gen, axis=0)
 
 def sample_half(sess):
@@ -244,77 +234,54 @@ def make_feed_dict(data, init=False):
 if not os.path.exists(args.save_dir):
     os.makedirs(args.save_dir)
 print('starting training')
-test_bpd = []
 lr = args.learning_rate
 
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_memory)
 with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
-    for epoch in range(args.max_epochs):
-        begin = time.time()
+    # init
+    # manually retrieve exactly init_batch_size examples
+    feed_dict = make_feed_dict(
+        train_data.next(args.init_batch_size), init=True)
+    train_data.reset()  # rewind the iterator back to 0 to do one full epoch
+    #sess.run(initializer, feed_dict)
+    sess.run(initializer)
+    sess.run(gen_par_init, feed_dict)
+    print('initializing the model...')
+    if args.load_params is not None:
+        #ckpt_file = args.save_dir + '/params_' + args.data_set + '.ckpt' + str(args.load_params)
+        ckpt_file = args.load_params
+        print('restoring parameters from', ckpt_file)
+        saver.restore(sess, ckpt_file)
 
-        # init
-        if epoch == 0:
-            # manually retrieve exactly init_batch_size examples
-            feed_dict = make_feed_dict(
-                train_data.next(args.init_batch_size), init=True)
-            train_data.reset()  # rewind the iterator back to 0 to do one full epoch
-            #sess.run(initializer, feed_dict)
-            sess.run(initializer)
-            sess.run(gen_par_init, feed_dict)
-            print('initializing the model...')
-            if args.load_params is not None:
-                #ckpt_file = args.save_dir + '/params_' + args.data_set + '.ckpt' + str(args.load_params)
-                ckpt_file = args.load_params
-                print('restoring parameters from', ckpt_file)
-                saver.restore(sess, ckpt_file)
+    # generate samples from the model
 
-        # train for one epoch
-        train_losses = []
-        for d in train_data:
-            feed_dict = make_feed_dict(d)
-            # forward/backward/update model on each gpu
-            lr *= args.lr_decay
-            feed_dict.update({tf_lr: lr})
-            l, _ = sess.run([bits_per_dim, optimizer], feed_dict)
-            train_losses.append(l)
-        train_loss_gen = np.mean(train_losses)
+    def plot_an_img(img, filename):
+        img_tile = plotting.img_tile(img[:args.num_sample],
+            tile_shape=(int(np.sqrt(args.num_sample)), int(np.sqrt(args.num_sample))),
+            aspect_ratio=1.0, border_color=1.0, stretch=True)
+        img = plotting.plot_img(img_tile)
+        plotting.plt.savefig(os.path.join(
+            args.save_dir, filename))
+        plotting.plt.close('all')
 
-        # compute likelihood over test data
-        test_losses = []
-        for d in test_data:
-            feed_dict = make_feed_dict(d)
-            l = sess.run(bits_per_dim_test, feed_dict)
-            test_losses.append(l)
-        test_loss_gen = np.mean(test_losses)
-        test_bpd.append(test_loss_gen)
+    #sample_x = sample_from_model(sess)
+    for i in range(args.num_gen):
+        print('Generateing samples', i)
+        sample_x, sample_input, test_img = sample_half(sess)
+        #img_tile = plotting.img_tile(sample_x[:int(np.floor(np.sqrt(
+        #    args.batch_size * args.nr_gpu))**2)], aspect_ratio=1.0, border_color=1.0, stretch=True)
 
-        # log progress to console
-        print("Iteration %d, time = %ds, train bits_per_dim = %.4f, test bits_per_dim = %.4f" % (
-            epoch, time.time() - begin, train_loss_gen, test_loss_gen))
-        sys.stdout.flush()
+        plot_an_img(sample_x, '%s_sample_%d.png' % (args.data_set, i))
+        if i == 0:
+            plot_an_img(sample_input, '%s_sample_input.png' % (args.data_set))
+            plot_an_img(test_img, '%s_test_img.png' % (args.data_set))
 
-        def plot_an_img(img, filename):
-            img_tile = plotting.img_tile(img[:args.num_sample],
-                tile_shape=(int(np.sqrt(args.num_sample)), int(np.sqrt(args.num_sample))),
-                aspect_ratio=1.0, border_color=1.0, stretch=True)
-            img = plotting.plot_img(img_tile)
-            plotting.plt.savefig(os.path.join(
-                args.save_dir, filename))
-            plotting.plt.close('all')
-
-        if epoch % args.save_interval == 0:
-            print('Generateing samples', epoch)
-            sample_x, sample_input, test_img = sample_half(sess)
-            #img_tile = plotting.img_tile(sample_x[:int(np.floor(np.sqrt(
-            #    args.batch_size * args.nr_gpu))**2)], aspect_ratio=1.0, border_color=1.0, stretch=True)
-
-            plot_an_img(sample_x, '%s_sample_%d.png' % (args.data_set, i))
-            if i == 0:
-                plot_an_img(sample_input, '%s_sample_input.png' % (args.data_set))
-                plot_an_img(test_img, '%s_test_img.png' % (args.data_set))
-
-            # save params
-            saver.save(sess, args.save_dir + '/params_' +
-                       args.data_set + '.ckpt' + epoch)
-            np.savez(args.save_dir + '/test_bpd_' + args.data_set +
-                     '.npz', test_bpd=np.array(test_bpd))
+    '''
+    sample_x = sample_from_model(sess)
+    img_tile = plotting.img_tile(sample_x[:int(np.floor(np.sqrt(
+        args.batch_size * args.nr_gpu))**2)], aspect_ratio=1.0, border_color=1.0, stretch=True)
+    img = plotting.plot_img(img_tile)
+    plotting.plt.savefig(os.path.join(
+        args.save_dir, '%s_sample_ori.png' % (args.data_set)))
+    plotting.plt.close('all')
+    '''

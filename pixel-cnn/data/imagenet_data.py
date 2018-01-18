@@ -30,7 +30,7 @@ def maybe_download_and_extract(data_dir):
     # more info on the dataset at http://image-net.org/small/download.php
     # downloads and extracts the two tar files for train/val
 
-'''
+    
     train_dir = os.path.join(data_dir, 'train_32x32')
     if not os.path.exists(train_dir):
         train_url = 'http://image-net.org/small/train_32x32.tar' # 4GB
@@ -38,7 +38,7 @@ def maybe_download_and_extract(data_dir):
         fetch(train_url, filepath)
         print('unpacking the tar file', filepath)
         tarfile.open(filepath, 'r').extractall(data_dir) # creates the train_32x32 folder
-'''
+    
 
     test_dir = os.path.join(data_dir, 'valid_32x32')
     if not os.path.exists(test_dir):
@@ -55,7 +55,7 @@ def maybe_preprocess(data_dir):
     if os.path.exists(npz_file1) and os.path.exists(npz_file2):
         return # all good
 
-'''
+    
     trainx = []
     train_dir = os.path.join(data_dir, 'train_32x32')
     for f in os.listdir(train_dir):
@@ -64,7 +64,7 @@ def maybe_preprocess(data_dir):
             filepath = os.path.join(train_dir, f)
             trainx.append(imread(filepath).reshape((1,32,32,3)))
     trainx = np.concatenate(trainx, axis=0)
-'''
+    
 
     testx = []
     test_dir = os.path.join(data_dir, 'valid_32x32')
@@ -75,9 +75,10 @@ def maybe_preprocess(data_dir):
             testx.append(imread(filepath).reshape((1,32,32,3)))
     testx = np.concatenate(testx, axis=0)
 
-    #np.save(npz_file1, trainx)
-    np.save(npz_file1, testx[10000:])
-    np.save(npz_file2, testx[:10000])
+    np.save(npz_file1, trainx)
+    np.save(npz_file2, testx)
+    #np.save(npz_file1, testx[10000:])
+    #np.save(npz_file2, testx[:10000])
 
 
 def load(data_dir, subset='train'):
